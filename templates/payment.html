@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Página de Pagamento</title>
+    <link rel="stylesheet" href="/static/style.css">
+    
+</head>
+<body>
+    <div class="container">
+        <h1>Finalizar Pagamento</h1>
+        <p>Produto: Nome do Produto</p>
+        <p>Preço: €50,00</p>
+
+        <!-- Botão para pagamento com Stripe (cartão de crédito) -->
+        <button id="checkout-stripe" src="https://js.stripe.com/v3/" >Pagar com Cartão de Crédito</button>
+
+        <!-- Botão para pagamento com PayPal -->
+        <button id="checkout-paypal">Pagar com PayPal</button>
+    </div>
+    
+    <script src="https://js.stripe.com/v3/"></script>
+    <script>
+        
+        var stripe = Stripe("pk_live_51Pxo7ZF1YgCaEexnB9kbtX48RSz79oBlztoZDjNdKc0NTPAzLUAsoBbmxD7t6L9PRcuv4TdVw4l6t76uCWB3LRSY002NBGI5nF");
+
+        document.getElementById('checkout-stripe').addEventListener('click', function () {
+            fetch('/create-stripe-session', {
+                method: 'POST',
+            })
+            .then(function (response) {
+                return response.json();
+            })
+            .then(function (sessionId) {
+                return stripe.redirectToCheckout({ sessionId: sessionId.id });
+            })
+            .catch(function (error) {
+                console.error('Erro ao criar sessão de checkout:', error);
+            });
+        });
+
+        document.getElementById('checkout-paypal').addEventListener('click', function () {
+            fetch('/create-paypal-payment', {
+                method: 'POST',
+            })
+            .then(function (response) {
+                return response.json();
+            })
+            .then(function (data) {
+                window.location.href = data.approval_url;
+            })
+            .catch(function (error) {
+                console.error('Erro ao criar pagamento PayPal:', error);
+            });
+        });
+    </script>
+</body>
+</html>
